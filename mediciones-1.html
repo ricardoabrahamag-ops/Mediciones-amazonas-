@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mis Mediciones</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --card: #1e1e1e;
+    --border: #2a2a2a;
+    --accent: #c8a96e;
+    --accent2: #e8c99a;
+    --text: #f0ece4;
+    --muted: #7a7570;
+    --positive: #6fcf97;
+    --negative: #eb5757;
+    --neutral: #c8a96e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Decorative background */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -200px; right: -200px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(200,169,110,0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── LANDING ── */
+  #landing {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .logo-mark {
+    width: 64px; height: 64px;
+    border: 1.5px solid var(--accent);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 2rem;
+    position: relative;
+    animation: pulse 3s ease-in-out infinite;
+  }
+  .logo-mark::before {
+    content: '';
+    position: absolute;
+    width: 80px; height: 80px;
+    border: 1px solid rgba(200,169,110,0.2);
+    border-radius: 50%;
+    animation: pulse 3s ease-in-out infinite reverse;
+  }
+  .logo-mark svg { width: 28px; height: 28px; stroke: var(--accent); fill: none; stroke-width: 1.5; }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+  }
+
+  #landing h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    text-align: center;
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+  }
+  #landing h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+  #landing p {
+    color: var(--muted);
+    font-size: 0.9rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 3rem;
+  }
+
+  .search-box {
+    width: 100%; max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .input-wrap {
+    position: relative;
+  }
+  .input-wrap input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    padding: 1rem 1.25rem;
+    border-radius: 4px;
+    outline: none;
+    transition: border-color 0.2s;
+    letter-spacing: 0.02em;
+  }
+  .input-wrap input:focus { border-color: var(--accent); }
+  .input-wrap input::placeholder { color: var(--muted); }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #0d0d0d;
+    border: none;
+    padding: 1rem 2rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0); }
+
+  #error-msg {
+    color: var(--negative);
+    font-size: 0.8rem;
+    text-align: center;
+    display: none;
+  }
+
+  /* ── DASHBOARD ── */
+  #dashboard { display: none; position: relative; z-index: 1; }
+
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0;
+    background: rgba(13,13,13,0.95);
+    backdrop-filter: blur(10px);
+    z-index: 10;
+  }
+  .top-bar .brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+  .top-bar .client-name {
+    font-size: 0.8rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .btn-back {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 0.4rem 0.9rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-back:hover { border-color: var(--accent); color: var(--accent); }
+
+  .hero-section {
+    padding: 3rem 2rem 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .hero-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 400;
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+  }
+  .hero-section h2 span { color: var(--accent); font-style: italic; }
+
+  .date-pills {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+  }
+  .date-pill {
+    padding: 0.35rem 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 0.75rem;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.04em;
+  }
+  .date-pill.active, .date-pill:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(200,169,110,0.08);
+  }
+  .date-pill.all { border-color: var(--accent); color: var(--accent); background: rgba(200,169,110,0.08); }
+
+  /* Stats grid */
+  .main-content {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 2rem 4rem;
+  }
+
+  .section-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 2.5rem 0 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Latest stats */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .stat-card {
+    background: var(--card);
+    padding: 1.25rem 1rem;
+    transition: background 0.2s;
+  }
+  .stat-card:hover { background: #222; }
+  .stat-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+  .stat-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 400;
+    color: var(--text);
+    line-height: 1;
+  }
+  .stat-unit {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-left: 0.2rem;
+  }
+  .stat-delta {
+    font-size: 0.7rem;
+    margin-top: 0.3rem;
+    display: flex; align-items: center; gap: 0.2rem;
+  }
+  .delta-pos { color: var(--positive); }
+  .delta-neg { color: var(--negative); }
+  .delta-neu { color: var(--neutral); }
+
+  /* Timeline table */
+  .timeline-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+    min-width: 700px;
+  }
+  thead th {
+    background: var(--surface);
+    padding: 0.9rem 1rem;
+    text-align: left;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 400;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(200,169,110,0.04); }
+  tbody td {
+    padding: 0.85rem 1rem;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .date-cell {
+    color: var(--accent);
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+  }
+  .change-cell {
+    font-size: 0.72rem;
+  }
+
+  /* Charts */
+  .charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+  }
+  .chart-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.25rem;
+  }
+  .chart-title {
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+  .chart-canvas-wrap { position: relative; height: 160px; }
+  canvas { width: 100% !important; }
+
+  /* Note badge */
+  .note-badge {
+    display: inline-block;
+    background: rgba(200,169,110,0.15);
+    border: 1px solid rgba(200,169,110,0.3);
+    color: var(--accent);
+    font-size: 0.65rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 3px;
+    letter-spacing: 0.05em;
+  }
+
+  /* Fade in */
+  .fade-in {
+    animation: fadeIn 0.5s ease forwards;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Mobile */
+  @media (max-width: 600px) {
+    .top-bar { padding: 1rem; }
+    .hero-section, .main-content { padding-left: 1rem; padding-right: 1rem; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* TMB card */
+  .tmb-card {
+    background: linear-gradient(135deg, rgba(200,169,110,0.12), rgba(200,169,110,0.04));
+    border: 1px solid rgba(200,169,110,0.35);
+    border-radius: 6px;
+    padding: 1.4rem 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .tmb-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: var(--accent);
+  }
+  .tmb-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.8rem;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 0.3rem;
+  }
+  .tmb-number span { font-size: 1rem; color: var(--muted); font-family: 'DM Sans', sans-serif; }
+  .tmb-title {
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+  .tmb-explanation {
+    font-size: 0.85rem;
+    color: var(--text);
+    line-height: 1.7;
+    opacity: 0.9;
+  }
+  .tmb-explanation strong { color: var(--accent); }
+  .tmb-breakdown {
+    margin-top: 1.2rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .tmb-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.82rem;
+    gap: 1rem;
+  }
+  .tmb-row:last-child { border-bottom: none; }
+  .tmb-activity { color: var(--text); opacity: 0.85; }
+  .tmb-activity small { display: block; color: var(--muted); font-size: 0.7rem; margin-top: 0.1rem; }
+  .tmb-kcal { color: var(--accent); font-weight: 500; white-space: nowrap; font-size: 0.85rem; }
+  .tmb-total {
+    background: rgba(200,169,110,0.08);
+  }
+  .tmb-total .tmb-activity { color: var(--text); font-weight: 500; opacity: 1; }
+  .tmb-total .tmb-kcal { font-size: 1rem; font-family: 'Playfair Display', serif; }
+  .tmb-conclusion {
+    margin-top: 1rem;
+    font-size: 0.82rem;
+    color: var(--text);
+    line-height: 1.6;
+    padding: 0.8rem 1rem;
+    background: rgba(200,169,110,0.06);
+    border-radius: 4px;
+    border-left: 3px solid var(--accent);
+  }
+  .tmb-conclusion strong { color: var(--accent); }
+
+  /* Objetivo banner */
+  .objetivo-banner {
+    margin-top: 1rem;
+    border: 1px solid;
+    border-radius: 4px;
+    padding: 1rem 1.2rem;
+  }
+  .objetivo-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.3rem;
+  }
+  .objetivo-tipo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  .objetivo-desc {
+    font-size: 0.85rem;
+    color: var(--text);
+    line-height: 1.6;
+    margin-bottom: 0.5rem;
+  }
+  .objetivo-desc strong { font-weight: 600; }
+  .objetivo-nota {
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+  .objetivo-nota strong { color: var(--text); }
+
+  /* Motivational card */
+  .motivational-card {
+    margin-top: 2.5rem;
+    margin-bottom: 2rem;
+    padding: 2rem;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+    position: relative;
+  }
+  .motivational-card::before {
+    content: '"';
+    position: absolute;
+    top: -1rem; left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Playfair Display', serif;
+    font-size: 4rem;
+    color: var(--accent);
+    opacity: 0.3;
+    line-height: 1;
+  }
+  .motivational-quote {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(0.95rem, 2.5vw, 1.15rem);
+    font-style: italic;
+    color: var(--text);
+    line-height: 1.8;
+    margin-bottom: 1rem;
+    opacity: 0.9;
+  }
+  .motivational-author {
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+</style>
+</head>
+<body>
+
+<!-- LANDING -->
+<section id="landing">
+  <div class="logo-mark">
+    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+  </div>
+  <h1>Tu progreso,<br><em>tu historia</em></h1>
+  <p>Seguimiento de mediciones personales</p>
+  <div class="search-box">
+    <div class="input-wrap">
+      <input type="text" id="name-input" placeholder="Escribe tu nombre..." autocomplete="off" />
+    </div>
+    <button class="btn-primary" onclick="buscarClienta()">Ver mis mediciones</button>
+    <div id="error-msg">No encontré ese nombre. Verifica cómo está registrado.</div>
+  </div>
+</section>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <div class="top-bar">
+    <div class="brand">Body Track</div>
+    <div class="client-name" id="dash-name"></div>
+    <button class="btn-back" onclick="volverLanding()">← Salir</button>
+  </div>
+
+  <div class="hero-section fade-in">
+    <h2>Hola, <span id="hero-name"></span></h2>
+    <p style="color:var(--muted); margin-top:.4rem; font-size:.85rem;">Aquí está tu historial completo de mediciones</p>
+    <div class="date-pills" id="date-pills"></div>
+  </div>
+
+  <div class="main-content">
+    <div class="section-label">Última medición</div>
+    <div class="stats-grid" id="stats-grid"></div>
+
+    <div id="tmb-section" style="display:none; margin-top:1rem;">
+      <div class="section-label">Tu tasa metabólica basal</div>
+      <div id="tmb-card"></div>
+    </div>
+
+    <div class="section-label">Historial</div>
+    <div class="timeline-wrap">
+      <table>
+        <thead id="table-head"></thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+
+    <div class="section-label">Gráficas de progreso</div>
+    <div class="charts-grid" id="charts-grid"></div>
+
+    <div class="motivational-card" id="motivational-card">
+      <div class="motivational-quote">"El mérito es tuyo. Nadie más se levantó por ti, nadie más entrenó por ti, nadie más eligió lo que ponías en tu plato. Este progreso es el resultado de elegir tu salud, tu bienestar y tu mejor versión — día tras día."</div>
+      <div class="motivational-author">— Abraham Aguirre · Tu Health Coach</div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+
+// ══════════════════════════════════════════
+// DATOS — pega aquí los de tu Google Sheets
+// ══════════════════════════════════════════
+const DATA = [
+  // ── Enero ──
+  { fecha:"15 enero", nombre:"sayra",    peso:53.4, pecho:83,   cintura:68,   cadera:92,   pierna:53,   pantorrilla:33,  brazo:25,   nota:"",            pctGrasa:30.5, pctMusculo:26.7, edadMeta:30, visceral:4 },
+  { fecha:"15 enero", nombre:"alma",     peso:60.8, pecho:90,   cintura:72,   cadera:93.5, pierna:58,   pantorrilla:37,  brazo:28,   nota:"",            pctGrasa:32.7, pctMusculo:28.5, edadMeta:48, visceral:6 },
+  { fecha:"15 enero", nombre:"leticia",  peso:63.1, pecho:95,   cintura:81,   cadera:100,  pierna:53,   pantorrilla:37,  brazo:28,   nota:"",            pctGrasa:37.2, pctMusculo:25,   edadMeta:49, visceral:7 },
+  { fecha:"15 enero", nombre:"adriana",  peso:66.4, pecho:94,   cintura:78,   cadera:101,  pierna:58,   pantorrilla:36,  brazo:31.5, nota:"",            pctGrasa:38.3, pctMusculo:23.8, edadMeta:41, visceral:6 },
+  { fecha:"15 enero", nombre:"lorena",   peso:61.7, pecho:82,   cintura:69,   cadera:105,  pierna:63,   pantorrilla:38,  brazo:32,   nota:"",            pctGrasa:36.5, pctMusculo:26.8, edadMeta:47, visceral:6 },
+  { fecha:"15 enero", nombre:"georgina", peso:67.3, pecho:91,   cintura:74,   cadera:106,  pierna:57,   pantorrilla:33,  brazo:31,   nota:"",            pctGrasa:35.9, pctMusculo:25.8, edadMeta:34, visceral:5 },
+  { fecha:"15 enero", nombre:"laura",    peso:55.1, pecho:88,   cintura:68,   cadera:93,   pierna:54,   pantorrilla:32,  brazo:29,   nota:"",            pctGrasa:31.6, pctMusculo:27.2, edadMeta:34, visceral:5 },
+  { fecha:"15 enero", nombre:"lili",     peso:56.4, pecho:88,   cintura:71,   cadera:93,   pierna:55,   pantorrilla:33,  brazo:27,   nota:"",            pctGrasa:28.9, pctMusculo:30,   edadMeta:36, visceral:5 },
+  { fecha:"15 enero", nombre:"abril",    peso:64.2, pecho:92,   cintura:73,   cadera:106,  pierna:56,   pantorrilla:32,  brazo:28,   nota:"",            pctGrasa:39.6, pctMusculo:23.5, edadMeta:42, visceral:6 },
+  { fecha:"15 enero", nombre:"liz",      peso:53.5, pecho:87,   cintura:64,   cadera:88,   pierna:51,   pantorrilla:31,  brazo:27,   nota:"",            pctGrasa:30.7, pctMusculo:26.4, edadMeta:34, visceral:5 },
+  { fecha:"15 enero", nombre:"mariana",  peso:73.5, pecho:90,   cintura:75,   cadera:105,  pierna:65,   pantorrilla:36,  brazo:31,   nota:"",            pctGrasa:39.1, pctMusculo:25.9, edadMeta:38, visceral:5 },
+  { fecha:"15 enero", nombre:"alejandra",peso:63.4, pecho:90,   cintura:71,   cadera:104,  pierna:58,   pantorrilla:35,  brazo:31,   nota:"",            pctGrasa:38,   pctMusculo:24.5, edadMeta:33, visceral:5 },
+  { fecha:"15 enero", nombre:"graciela", peso:55.4, pecho:91,   cintura:74,   cadera:92,   pierna:50,   pantorrilla:31,  brazo:27,   nota:"",            pctGrasa:29.3, pctMusculo:28.5, edadMeta:48, visceral:6 },
+  { fecha:"15 enero", nombre:"karely",   peso:65.5, pecho:97,   cintura:76,   cadera:106,  pierna:58,   pantorrilla:34,  brazo:31,   nota:"",            pctGrasa:38.1, pctMusculo:25,   edadMeta:37, visceral:5 },
+  { fecha:"15 enero", nombre:"yola",     peso:58.7, pecho:96,   cintura:85,   cadera:92,   pierna:50,   pantorrilla:33,  brazo:27,   nota:"",            pctGrasa:36,   pctMusculo:25.4, edadMeta:55, visceral:7 },
+  { fecha:"15 enero", nombre:"paula",    peso:67.5, pecho:92,   cintura:77,   cadera:105,  pierna:56,   pantorrilla:32,  brazo:29,   nota:"",            pctGrasa:39.3, pctMusculo:24,   edadMeta:44, visceral:7 },
+  { fecha:"15 enero", nombre:"bea",      peso:63.5, pecho:92,   cintura:75,   cadera:106,  pierna:54,   pantorrilla:36,  brazo:27,   nota:"",            pctGrasa:36.6, pctMusculo:25.9, edadMeta:52, visceral:7 },
+  { fecha:"22 enero", nombre:"liliana",  peso:66.7, pecho:92,   cintura:72,   cadera:106,  pierna:56,   pantorrilla:35.5,brazo:29.5, nota:"",            pctGrasa:33.8, pctMusculo:29,   edadMeta:43, visceral:6 },
+  // ── Febrero ──
+  { fecha:"5 feb", nombre:"luisa",    peso:67,   pecho:98,   cintura:81,   cadera:102,  pierna:58.5, pantorrilla:33,  brazo:30,   nota:"",             pctGrasa:40.7, pctMusculo:25,   edadMeta:51, visceral:7 },
+  { fecha:"5 feb", nombre:"heidy",    peso:64.3, pecho:92,   cintura:71,   cadera:103,  pierna:57,   pantorrilla:33,  brazo:29,   nota:"",             pctGrasa:40.8, pctMusculo:24.5, edadMeta:51, visceral:7 },
+  { fecha:"5 feb", nombre:"sayra",    peso:53.5, pecho:82,   cintura:67,   cadera:93,   pierna:52,   pantorrilla:32,  brazo:25,   nota:"",             pctGrasa:29.3, pctMusculo:28,   edadMeta:30, visceral:4 },
+  { fecha:"5 feb", nombre:"alma",     peso:60.4, pecho:88,   cintura:74,   cadera:92,   pierna:56.5, pantorrilla:36.5,brazo:29,   nota:"",             pctGrasa:32.4, pctMusculo:28.6, edadMeta:48, visceral:6 },
+  { fecha:"5 feb", nombre:"leticia",  peso:63.5, pecho:93.5, cintura:79.5, cadera:98,   pierna:52.5, pantorrilla:36,  brazo:29,   nota:"",             pctGrasa:37.9, pctMusculo:25,   edadMeta:50, visceral:7 },
+  { fecha:"5 feb", nombre:"lorena",   peso:61.4, pecho:79,   cintura:68,   cadera:102,  pierna:58,   pantorrilla:37.5,brazo:31,   nota:"",             pctGrasa:36.7, pctMusculo:26.5, edadMeta:47, visceral:7 },
+  { fecha:"5 feb", nombre:"georgina", peso:67.9, pecho:92,   cintura:74,   cadera:104,  pierna:58.5, pantorrilla:32,  brazo:30,   nota:"",             pctGrasa:35.2, pctMusculo:26.6, edadMeta:35, visceral:5 },
+  { fecha:"5 feb", nombre:"adriana",  peso:66.4, pecho:93,   cintura:74,   cadera:100,  pierna:58.5, pantorrilla:35,  brazo:32,   nota:"",             pctGrasa:38.1, pctMusculo:24.1, edadMeta:41, visceral:6 },
+  { fecha:"5 feb", nombre:"liliana",  peso:68.2, pecho:null, cintura:null, cadera:null, pierna:null, pantorrilla:null,brazo:null, nota:"menstrual",    pctGrasa:null, pctMusculo:null, edadMeta:null, visceral:null },
+  { fecha:"5 feb", nombre:"laura",    peso:57.1, pecho:85,   cintura:66,   cadera:94,   pierna:55,   pantorrilla:31,  brazo:29.5, nota:"",             pctGrasa:30.8, pctMusculo:28.9, edadMeta:37, visceral:5 },
+  { fecha:"5 feb", nombre:"andrea",   peso:71.2, pecho:95,   cintura:74,   cadera:112,  pierna:62.5, pantorrilla:35,  brazo:28,   nota:"",             pctGrasa:42.6, pctMusculo:23.9, edadMeta:46, visceral:6 },
+  { fecha:"5 feb", nombre:"mariana",  peso:73.5, pecho:87.5, cintura:75,   cadera:104,  pierna:65,   pantorrilla:35,  brazo:30,   nota:"",             pctGrasa:38.7, pctMusculo:26.2, edadMeta:38, visceral:5 },
+  { fecha:"5 feb", nombre:"yola",     peso:59.5, pecho:96,   cintura:84,   cadera:92,   pierna:51,   pantorrilla:32,  brazo:27,   nota:"",             pctGrasa:35.8, pctMusculo:26,   edadMeta:56, visceral:7 },
+  { fecha:"5 feb", nombre:"bea",      peso:65,   pecho:92,   cintura:73,   cadera:105,  pierna:56,   pantorrilla:35,  brazo:28,   nota:"",             pctGrasa:36.9, pctMusculo:25.8, edadMeta:52, visceral:7 },
+  { fecha:"5 feb", nombre:"paula",    peso:66.8, pecho:93,   cintura:76,   cadera:105,  pierna:56.5, pantorrilla:34,  brazo:29.5, nota:"",             pctGrasa:38.5, pctMusculo:24.5, edadMeta:43, visceral:6 },
+  { fecha:"5 feb", nombre:"liz",      peso:53.4, pecho:91,   cintura:66,   cadera:87,   pierna:50,   pantorrilla:31,  brazo:26,   nota:"",             pctGrasa:29.9, pctMusculo:27.2, edadMeta:34, visceral:5 },
+  { fecha:"5 feb", nombre:"estefania",peso:55.5, pecho:85,   cintura:67.5, cadera:90,   pierna:51,   pantorrilla:31,  brazo:28.5, nota:"",             pctGrasa:28.6, pctMusculo:29.3, edadMeta:26, visceral:4 },
+  // ── Marzo ──
+  { fecha:"9 mzo", nombre:"alma",     peso:60,   pecho:89,   cintura:67,   cadera:89.5, pierna:57,   pantorrilla:36,  brazo:27.5, nota:"abs 12mm-tr 15",pctGrasa:33.7, pctMusculo:27.8, edadMeta:48, visceral:6 },
+  { fecha:"9 mzo", nombre:"sayra",    peso:53,   pecho:80.5, cintura:64,   cadera:93.5, pierna:54,   pantorrilla:33,  brazo:25.5, nota:"esp-21",        pctGrasa:30,   pctMusculo:26.7, edadMeta:29, visceral:4 },
+  { fecha:"9 mzo", nombre:"adriana",  peso:64.8, pecho:92,   cintura:71,   cadera:100,  pierna:57.5, pantorrilla:34,  brazo:31,   nota:"abs-30mm",      pctGrasa:36.8, pctMusculo:24.5, edadMeta:39, visceral:6 },
+  { fecha:"9 mzo", nombre:"georgina", peso:67.3, pecho:91,   cintura:70,   cadera:105,  pierna:58.5, pantorrilla:33,  brazo:29,   nota:"cresta",        pctGrasa:36.8, pctMusculo:25,   edadMeta:34, visceral:5 },
+  { fecha:"9 mzo", nombre:"laura",    peso:58.6, pecho:87,   cintura:66,   cadera:96,   pierna:57,   pantorrilla:32,  brazo:29,   nota:"abs-20mm",      pctGrasa:32.4, pctMusculo:28.2, edadMeta:39, visceral:5 },
+  { fecha:"9 mzo", nombre:"abril",    peso:65.5, pecho:90,   cintura:74,   cadera:104,  pierna:53,   pantorrilla:33,  brazo:27,   nota:"esp-20mm,crest", pctGrasa:38.3, pctMusculo:25.3, edadMeta:43, visceral:6 },
+  { fecha:"9 mzo", nombre:"mariana",  peso:73.4, pecho:86,   cintura:73,   cadera:102,  pierna:61,   pantorrilla:35,  brazo:30,   nota:"",              pctGrasa:39.8, pctMusculo:26.3, edadMeta:39, visceral:6 },
+  { fecha:"9 mzo", nombre:"graciela", peso:55.7, pecho:91,   cintura:75,   cadera:92,   pierna:49,   pantorrilla:31,  brazo:27,   nota:"",              pctGrasa:30.4, pctMusculo:27.7, edadMeta:49, visceral:6 },
+  { fecha:"9 mzo", nombre:"andrea",   peso:71.5, pecho:94,   cintura:71,   cadera:112,  pierna:62,   pantorrilla:34,  brazo:28,   nota:"",              pctGrasa:42,   pctMusculo:23.9, edadMeta:46, visceral:7 },
+  { fecha:"9 mzo", nombre:"alejandra",peso:59.1, pecho:87,   cintura:66,   cadera:99,   pierna:54.5, pantorrilla:31,  brazo:27,   nota:"",              pctGrasa:34.1, pctMusculo:26.1, edadMeta:28, visceral:4 },
+  { fecha:"9 mzo", nombre:"karely",   peso:66.8, pecho:98,   cintura:74,   cadera:106,  pierna:59,   pantorrilla:33.5,brazo:26,   nota:"",              pctGrasa:40,   pctMusculo:23.7, edadMeta:42, visceral:6 },
+  { fecha:"9 mzo", nombre:"sofi",     peso:84.7, pecho:101,  cintura:89,   cadera:111,  pierna:63,   pantorrilla:40,  brazo:35,   nota:"",              pctGrasa:46.8, pctMusculo:22.9, edadMeta:58, visceral:9 },
+  { fecha:"9 mzo", nombre:"yola",     peso:59.4, pecho:95,   cintura:81,   cadera:93,   pierna:48,   pantorrilla:32,  brazo:27,   nota:"",              pctGrasa:34.8, pctMusculo:26.7, edadMeta:56, visceral:7 },
+  { fecha:"9 mzo", nombre:"bea",      peso:64.7, pecho:92,   cintura:71,   cadera:107,  pierna:58,   pantorrilla:35,  brazo:26,   nota:"",              pctGrasa:35.6, pctMusculo:26.6, edadMeta:51, visceral:7 },
+  { fecha:"9 mzo", nombre:"liz",      peso:52.5, pecho:86.5, cintura:62.5, cadera:86.5, pierna:50.5, pantorrilla:31,  brazo:25.5, nota:"",              pctGrasa:29.5, pctMusculo:26.8, edadMeta:32, visceral:4 },
+  { fecha:"9 mzo", nombre:"leticia",  peso:63.6, pecho:89.5, cintura:79,   cadera:98.5, pierna:52,   pantorrilla:37,  brazo:28.5, nota:"",              pctGrasa:37,   pctMusculo:25.5, edadMeta:50, visceral:7 },
+  { fecha:"9 mzo", nombre:"lorena",   peso:60.7, pecho:81,   cintura:67.5, cadera:102,  pierna:59,   pantorrilla:36,  brazo:31.5, nota:"",              pctGrasa:37.8, pctMusculo:25.4, edadMeta:46, visceral:6 },
+  // ── Abril ──
+  { fecha:"9 abr", nombre:"alma",     peso:59.3, pecho:88,   cintura:67.5, cadera:91,   pierna:54,   pantorrilla:35.5,brazo:27,   nota:"",  tmb:null, pctGrasa:33.2, pctMusculo:27.8, edadMeta:47, visceral:6 },
+  { fecha:"9 abr", nombre:"mabeth",   peso:69.7, pecho:93.5, cintura:81,   cadera:108,  pierna:51,   pantorrilla:32,  brazo:29,   nota:"",  tmb:1400, pctGrasa:46.2, pctMusculo:20.6, edadMeta:52, visceral:8 },
+  { fecha:"9 abr", nombre:"luisa",    peso:69.2, pecho:99,   cintura:81,   cadera:104,  pierna:60,   pantorrilla:35,  brazo:29.5, nota:"",  tmb:1400, pctGrasa:40.7, pctMusculo:25.5, edadMeta:53, visceral:8 },
+  { fecha:"9 abr", nombre:"leticia",  peso:63.8, pecho:89,   cintura:78,   cadera:98,   pierna:50,   pantorrilla:36,  brazo:26.5, nota:"",  tmb:1350, pctGrasa:37,   pctMusculo:25.6, edadMeta:50, visceral:7 },
+  { fecha:"9 abr", nombre:"sayra",    peso:53.6, pecho:82,   cintura:64,   cadera:93,   pierna:52,   pantorrilla:32,  brazo:24,   nota:"",  tmb:1300, pctGrasa:30.6, pctMusculo:26.7, edadMeta:30, visceral:4 },
+  { fecha:"9 abr", nombre:"lorena",   peso:62.5, pecho:80,   cintura:68,   cadera:102,  pierna:57.5, pantorrilla:37,  brazo:30.5, nota:"",  tmb:1300, pctGrasa:36.8, pctMusculo:26.8, edadMeta:48, visceral:7 },
+  { fecha:"9 abr", nombre:"adriana",  peso:63.6, pecho:90,   cintura:69.5, cadera:91,   pierna:55,   pantorrilla:34,  brazo:29,   nota:"",  tmb:1380, pctGrasa:35.9, pctMusculo:24.8, edadMeta:37, visceral:6 },
+  { fecha:"9 abr", nombre:"georgina", peso:66.2, pecho:88,   cintura:72.5, cadera:103,  pierna:58.5, pantorrilla:31,  brazo:29,   nota:"",  tmb:1400, pctGrasa:36.1, pctMusculo:25.1, edadMeta:32, visceral:5 },
+  { fecha:"9 abr", nombre:"estefania",peso:56.8, pecho:83,   cintura:65,   cadera:90,   pierna:52,   pantorrilla:33,  brazo:28.5, nota:"",  tmb:1300, pctGrasa:29.3, pctMusculo:29.3, edadMeta:26, visceral:4 },
+  { fecha:"9 abr", nombre:"andrea",   peso:71.5, pecho:93,   cintura:71,   cadera:109,  pierna:59.5, pantorrilla:34,  brazo:27.5, nota:"",  tmb:1400, pctGrasa:41,   pctMusculo:24.8, edadMeta:46, visceral:6 },
+  { fecha:"9 abr", nombre:"liz",      peso:52.8, pecho:86.5, cintura:62,   cadera:86,   pierna:50.5, pantorrilla:31.5,brazo:26,   nota:"",  tmb:1300, pctGrasa:29.5, pctMusculo:27.1, edadMeta:33, visceral:4 },
+  { fecha:"9 abr", nombre:"graciela", peso:56.3, pecho:87,   cintura:76,   cadera:93,   pierna:52,   pantorrilla:31,  brazo:28,   nota:"",  tmb:1300, pctGrasa:27.2, pctMusculo:30.2, edadMeta:48, visceral:6 },
+  { fecha:"9 abr", nombre:"mariana",  peso:null, pecho:85,   cintura:73,   cadera:101,  pierna:60.5, pantorrilla:34,  brazo:29.5, nota:"",  tmb:null, pctGrasa:null, pctMusculo:null, edadMeta:null, visceral:null },
+  { fecha:"9 abr", nombre:"karely",   peso:67.5, pecho:94,   cintura:73.5, cadera:105,  pierna:59,   pantorrilla:33,  brazo:26,   nota:"",  tmb:1370, pctGrasa:40,   pctMusculo:24.5, edadMeta:43, visceral:6 },
+  { fecha:"9 abr", nombre:"yola",     peso:59.2, pecho:94,   cintura:80.5, cadera:93,   pierna:50.5, pantorrilla:33,  brazo:26,   nota:"",  tmb:1300, pctGrasa:34.7, pctMusculo:26.9, edadMeta:55, visceral:7 },
+  { fecha:"9 abr", nombre:"vanessa",  peso:63,   pecho:84,   cintura:72,   cadera:107,  pierna:53.5, pantorrilla:34,  brazo:31,   nota:"",  tmb:1300, pctGrasa:39.3, pctMusculo:24.8, edadMeta:48, visceral:7 },
+  { fecha:"9 abr", nombre:"sofi",     peso:81.7, pecho:99,   cintura:87,   cadera:108,  pierna:59.5, pantorrilla:36,  brazo:34.5, nota:"",  tmb:1523, pctGrasa:46.1, pctMusculo:22.9, edadMeta:56, visceral:8 },
+];
+
+const CAMPOS = [
+  { key:"peso",       label:"Peso",        unit:"kg" },
+  { key:"pecho",      label:"Pecho",       unit:"cm" },
+  { key:"cintura",    label:"Cintura",     unit:"cm" },
+  { key:"cadera",     label:"Cadera",      unit:"cm" },
+  { key:"pierna",     label:"Pierna",      unit:"cm" },
+  { key:"pantorrilla",label:"Pantorrilla", unit:"cm" },
+  { key:"brazo",      label:"Brazo",       unit:"cm" },
+  { key:"pctGrasa",   label:"% Grasa",     unit:"%" },
+  { key:"pctMusculo", label:"% Músculo",   unit:"%" },
+  { key:"edadMeta",   label:"Edad Metab.", unit:"" },
+  { key:"visceral",   label:"Visceral",    unit:"" },
+  { key:"tmb",        label:"TMB",         unit:"kcal" },
+];
+
+// ══════════════════════════════════════════
+// OBJETIVOS — déficit / recomposición / mantenimiento / superávit
+// ══════════════════════════════════════════
+const OBJETIVOS = {
+  // Déficit claro
+  "mabeth":    { tipo:"deficit",       label:"Déficit",        color:"#eb5757" },
+  "sofi":      { tipo:"deficit",       label:"Déficit",        color:"#eb5757" },
+  "luisa":     { tipo:"deficit",       label:"Déficit",        color:"#eb5757" },
+  "andrea":    { tipo:"deficit",       label:"Déficit",        color:"#eb5757" },
+  "karely":    { tipo:"deficit",       label:"Déficit",        color:"#eb5757" },
+  "vanessa":   { tipo:"deficit",       label:"Déficit",        color:"#eb5757" },
+  "mariana":   { tipo:"deficit",       label:"Déficit",        color:"#eb5757" },
+  // Recomposición / Déficit leve
+  "leticia":   { tipo:"recomposicion", label:"Recomposición",  color:"#f2994a" },
+  "lorena":    { tipo:"recomposicion", label:"Recomposición",  color:"#f2994a" },
+  "georgina":  { tipo:"recomposicion", label:"Recomposición",  color:"#f2994a" },
+  "adriana":   { tipo:"recomposicion", label:"Recomposición",  color:"#f2994a" },
+  "yola":      { tipo:"mantenimiento", label:"Mantenimiento",  color:"#c8a96e" },
+  "alma":      { tipo:"recomposicion", label:"Recomposición",  color:"#f2994a" },
+  "sayra":     { tipo:"recomposicion", label:"Recomposición",  color:"#f2994a" },
+  "estefania": { tipo:"recomposicion", label:"Recomposición",  color:"#f2994a" },
+  // Mantenimiento
+  "liz":       { tipo:"mantenimiento", label:"Mantenimiento",  color:"#c8a96e" },
+  // Superávit leve
+  "graciela":  { tipo:"superavit",     label:"Superávit",      color:"#6fcf97" },
+};
+
+function getObjetivo(nombre) {
+  const n = normalize(nombre);
+  return OBJETIVOS[n] || null;
+}
+
+function calcularCalorias(tmb, tipo) {
+  const tdee = Math.round(tmb * 1.5);
+  switch(tipo) {
+    case "deficit":       return { min: tdee - 500, max: tdee - 300, tdee };
+    case "recomposicion": return { min: tdee - 200, max: tdee - 100, tdee };
+    case "mantenimiento": return { min: tdee - 100, max: tdee + 100, tdee };
+    case "superavit":     return { min: tdee + 200, max: tdee + 300, tdee };
+    default:              return { min: tdee, max: tdee, tdee };
+  }
+}
+const CHART_CAMPOS = ["peso","pctGrasa","pctMusculo","cintura","cadera","pierna"];
+
+let charts = [];
+
+function normalize(str) {
+  return str.toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
+function getClientData(nombre) {
+  const n = normalize(nombre);
+  return DATA.filter(r => normalize(r.nombre) === n);
+}
+
+function buscarClienta() {
+  const input = document.getElementById('name-input').value.trim();
+  if (!input) return;
+  const rows = getClientData(input);
+  if (!rows.length) {
+    document.getElementById('error-msg').style.display = 'block';
+    return;
+  }
+  document.getElementById('error-msg').style.display = 'none';
+  mostrarDashboard(rows, input);
+}
+
+document.getElementById('name-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') buscarClienta();
+});
+
+// Auto-load from URL ?clienta=sayra
+window.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(location.search);
+  const c = params.get('clienta');
+  if (c) {
+    document.getElementById('name-input').value = c;
+    buscarClienta();
+  }
+});
+
+function volverLanding() {
+  charts.forEach(c => c.destroy());
+  charts = [];
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('landing').style.display = 'flex';
+}
+
+function mostrarDashboard(rows, nombre) {
+  charts.forEach(c => c.destroy());
+  charts = [];
+
+  document.getElementById('landing').style.display = 'none';
+  const dash = document.getElementById('dashboard');
+  dash.style.display = 'block';
+
+  // Capitalize
+  const cap = nombre.charAt(0).toUpperCase() + nombre.slice(1).toLowerCase();
+  document.getElementById('dash-name').textContent = cap;
+  document.getElementById('hero-name').textContent = cap + ' ✨';
+
+  // Sort rows by date order
+  const fechaOrder = {"15 enero":1,"22 enero":2,"5 feb":3,"9 mzo":4,"9 abr":5};
+  rows = [...rows].sort((a,b) => (fechaOrder[a.fecha]||99) - (fechaOrder[b.fecha]||99));
+
+  // Date pills
+  const fechas = [...new Set(rows.map(r => r.fecha))];
+  const pillsDiv = document.getElementById('date-pills');
+  pillsDiv.innerHTML = '';
+  const allPill = document.createElement('div');
+  allPill.className = 'date-pill all';
+  allPill.textContent = 'Todas';
+  allPill.onclick = () => renderAll(rows, fechas);
+  pillsDiv.appendChild(allPill);
+  fechas.forEach(f => {
+    const p = document.createElement('div');
+    p.className = 'date-pill';
+    p.textContent = f;
+    pillsDiv.appendChild(p);
+  });
+
+  renderAll(rows, fechas);
+}
+
+function renderAll(rows, fechas) {
+  const last = rows.filter(r => r.fecha === fechas[fechas.length - 1])[0] || rows[rows.length - 1];
+  const prev = rows.length > 1 ? rows[rows.length - 2] : null;
+
+  // Stats grid
+  const grid = document.getElementById('stats-grid');
+  grid.innerHTML = '';
+  CAMPOS.forEach(campo => {
+    const val = last[campo.key];
+    if (val === null || val === undefined) return;
+    const card = document.createElement('div');
+    card.className = 'stat-card';
+    let deltaHTML = '';
+    if (prev && prev[campo.key] != null) {
+      const diff = +(val - prev[campo.key]).toFixed(1);
+      const arrow = diff > 0 ? '▲' : diff < 0 ? '▼' : '—';
+      // For grasa/cintura/cadera/peso negative change is good
+      const goodDown = ['peso','pctGrasa','cintura','cadera','pierna','brazo','edadMeta','visceral'].includes(campo.key);
+      let cls = 'delta-neu';
+      if (diff !== 0) cls = (diff < 0 === goodDown) ? 'delta-pos' : 'delta-neg';
+      if (diff === 0) cls = 'delta-neu';
+      deltaHTML = `<div class="stat-delta ${cls}">${arrow} ${Math.abs(diff)}${campo.unit} vs anterior</div>`;
+    }
+    card.innerHTML = `
+      <div class="stat-label">${campo.label}</div>
+      <div class="stat-value">${val}<span class="stat-unit">${campo.unit}</span></div>
+      ${deltaHTML}
+    `;
+    grid.appendChild(card);
+  });
+
+  // Note
+  if (last.nota) {
+    const noteCard = document.createElement('div');
+    noteCard.className = 'stat-card';
+    noteCard.style.gridColumn = '1 / -1';
+    noteCard.innerHTML = `<div class="stat-label">Nota</div><div style="margin-top:.4rem">${last.nota}</div>`;
+    grid.appendChild(noteCard);
+  }
+
+  // TMB section
+  const tmbSection = document.getElementById('tmb-section');
+  const tmbCardEl = document.getElementById('tmb-card');
+  const objetivo = getObjetivo(rows[0].nombre);
+
+  if (last.tmb) {
+    tmbSection.style.display = 'block';
+    const actividadBasica = 300;
+    const gym = 320;
+    const termogenesis = Math.round(last.tmb * 0.1);
+    const total = last.tmb + actividadBasica + gym + termogenesis;
+    let objetivoHTML = '';
+    if (objetivo) {
+      const cal = calcularCalorias(last.tmb, objetivo.tipo);
+      const descripciones = {
+        deficit:       `Reducir % de grasa conservando músculo. Come entre <strong>${cal.min}–${cal.max} kcal/día</strong>.`,
+        recomposicion: `Reducir grasa y ganar músculo al mismo tiempo. Come entre <strong>${cal.min}–${cal.max} kcal/día</strong>.`,
+        mantenimiento: `Mantener tu composición actual y construir músculo. Come entre <strong>${cal.min}–${cal.max} kcal/día</strong>.`,
+        superavit:     `Prioridad ganar músculo. Come entre <strong>${cal.min}–${cal.max} kcal/día</strong>.`,
+      };
+      objetivoHTML = `
+        <div class="objetivo-banner" style="border-color:${objetivo.color}; background:${objetivo.color}18;">
+          <div class="objetivo-label" style="color:${objetivo.color};">Tu objetivo actual</div>
+          <div class="objetivo-tipo" style="color:${objetivo.color};">${objetivo.label}</div>
+          <div class="objetivo-desc">${descripciones[objetivo.tipo]}</div>
+          <div class="objetivo-nota">Lo que tu cuerpo quema en un día real (con gym, trabajo y vida diaria): <strong>${cal.tdee} kcal</strong></div>
+        </div>`;
+    }
+    tmbCardEl.innerHTML = `
+      <div class="tmb-card">
+        <div class="tmb-title">Tasa Metabólica Basal</div>
+        <div class="tmb-number">${last.tmb}<span> kcal</span></div>
+        <div class="tmb-explanation">
+          Tu cuerpo necesita <strong>${last.tmb} kcal</strong> solo para existir en reposo — sin moverte, sin entrenar, sin hacer absolutamente nada. Eso es lo mínimo para que tu corazón lata, tu cerebro funcione y tus órganos trabajen.
+        </div>
+        <div class="tmb-breakdown">
+          <div class="tmb-row">
+            <span class="tmb-activity">🛌 Tu cuerpo en reposo total</span>
+            <span class="tmb-kcal">${last.tmb} kcal</span>
+          </div>
+          <div class="tmb-row">
+            <span class="tmb-activity">🚶 Actividad diaria básica <small>(caminar, trabajar, moverse)</small></span>
+            <span class="tmb-kcal">+ ~${actividadBasica} kcal</span>
+          </div>
+          <div class="tmb-row">
+            <span class="tmb-activity">🏋️ Entrenamiento en el gym <small>(1 hora de fuerza)</small></span>
+            <span class="tmb-kcal">+ ~${gym} kcal</span>
+          </div>
+          <div class="tmb-row">
+            <span class="tmb-activity">🔥 Digestión y termogénesis <small>(procesar lo que comes)</small></span>
+            <span class="tmb-kcal">+ ~${termogenesis} kcal</span>
+          </div>
+          <div class="tmb-row tmb-total">
+            <span class="tmb-activity">⚡ Lo que tu cuerpo realmente necesita</span>
+            <span class="tmb-kcal">≈ ${total} kcal</span>
+          </div>
+        </div>
+        <div class="tmb-conclusion">
+          <strong>Comer menos que ${last.tmb} kcal no es hacer dieta — es frenar tu metabolismo y trabajar en contra de tu cuerpo.</strong>
+        </div>
+        ${objetivoHTML}
+      </div>`;
+  } else {
+    tmbSection.style.display = 'none';
+  }
+
+  // Table
+  const thead = document.getElementById('table-head');
+  const tbody = document.getElementById('table-body');
+  thead.innerHTML = `<tr><th>Fecha</th>${CAMPOS.map(c=>`<th>${c.label}</th>`).join('')}<th>Nota</th></tr>`;
+  tbody.innerHTML = '';
+  rows.forEach((row, idx) => {
+    const tr = document.createElement('tr');
+    let cells = `<td class="date-cell">${row.fecha}</td>`;
+    CAMPOS.forEach(campo => {
+      const val = row[campo.key];
+      if (val === null || val === undefined) { cells += `<td style="color:var(--muted)">—</td>`; return; }
+      let delta = '';
+      if (idx > 0) {
+        const prev = rows[idx-1][campo.key];
+        if (prev != null) {
+          const diff = +(val - prev).toFixed(1);
+          if (diff !== 0) {
+            const goodDown = ['peso','pctGrasa','cintura','cadera','pierna','brazo','edadMeta','visceral'].includes(campo.key);
+            const cls = (diff < 0 === goodDown) ? 'delta-pos' : 'delta-neg';
+            delta = ` <span class="change-cell ${cls}">(${diff > 0 ? '+':''}${diff})</span>`;
+          }
+        }
+      }
+      cells += `<td>${val}${campo.unit}${delta}</td>`;
+    });
+    cells += `<td>${row.nota ? `<span class="note-badge">${row.nota}</span>` : '<span style="color:var(--muted)">—</span>'}</td>`;
+    tr.innerHTML = cells;
+    tbody.appendChild(tr);
+  });
+
+  // Charts
+  renderCharts(rows);
+}
+
+function renderCharts(rows) {
+  charts.forEach(c => c.destroy());
+  charts = [];
+  const grid = document.getElementById('charts-grid');
+  grid.innerHTML = '';
+
+  const labels = rows.map(r => r.fecha);
+  const chartColors = ['#c8a96e','#6fcf97','#56ccf2','#f2994a','#bb6bd9','#eb5757'];
+
+  CHART_CAMPOS.forEach((key, i) => {
+    const campo = CAMPOS.find(c => c.key === key);
+    const values = rows.map(r => r[key]);
+    if (values.every(v => v === null || v === undefined)) return;
+
+    const card = document.createElement('div');
+    card.className = 'chart-card';
+    card.innerHTML = `<div class="chart-title">${campo.label} ${campo.unit ? '('+campo.unit+')' : ''}</div><div class="chart-canvas-wrap"><canvas id="chart-${key}"></canvas></div>`;
+    grid.appendChild(card);
+
+    const ctx = document.getElementById(`chart-${key}`).getContext('2d');
+    const color = chartColors[i % chartColors.length];
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          data: values,
+          borderColor: color,
+          backgroundColor: color + '18',
+          pointBackgroundColor: color,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          fill: true,
+          tension: 0.4,
+          borderWidth: 2,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1e1e1e',
+            borderColor: '#2a2a2a',
+            borderWidth: 1,
+            titleColor: '#7a7570',
+            bodyColor: '#f0ece4',
+            callbacks: {
+              label: ctx => ` ${ctx.parsed.y}${campo.unit}`
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: '#1e1e1e' },
+            ticks: { color: '#7a7570', font: { size: 10 } }
+          },
+          y: {
+            grid: { color: '#222' },
+            ticks: { color: '#7a7570', font: { size: 10 } }
+          }
+        }
+      }
+    });
+    charts.push(chart);
+  });
+}
+</script>
+</body>
+</html>
